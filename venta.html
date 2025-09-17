@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ventas</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+body { background:#eef2f7; font-family:"Segoe UI", sans-serif;}
+header { background:#20c997; color:white; padding:1rem 2rem; border-radius:.75rem; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:2rem;}
+.card { border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+</style>
+</head>
+<body>
+<div class="container py-4">
+<header class="d-flex justify-content-between align-items-center">
+<h2><i class="bi bi-cash-stack"></i> Ventas</h2>
+<a href="index.html" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Regresar</a>
+</header>
+
+<div class="card p-4">
+<input type="text" id="buscarProducto" class="form-control mb-3" placeholder="Escanear código o escribir nombre">
+
+<div class="table-responsive">
+<table class="table table-hover" id="tablaVenta">
+<thead class="table-dark">
+<tr><th>Código</th><th>Nombre</th><th>Cantidad</th><th>Precio</th><th>Total</th><th>Acciones</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+
+<div class="d-flex justify-content-between mt-3">
+<h5>Total: $<span id="totalVenta">0.00</span></h5>
+<button id="btnFinalizar" class="btn btn-success"><i class="bi bi-check-circle"></i> Finalizar Venta</button>
+</div>
+<div id="msg" class="mt-3"></div>
+</div>
+</div>
+
+<script>
+let db;
+let ventaActual={};
+const request=indexedDB.open("punto_venta_db",1);
+request.onsuccess = e=>{db=e.target.result;};
+request.onerror = e=>console.error(e);
+
+// Buscar producto
+document.getElementById("buscarProducto").addEventListener("keypress", function(e){
+  if(e.key==="Enter"){
+    e.preventDefault();
+    const filtro=this.value.trim().toLowerCase();
+    if(!filtro) return;
+    const tx=db.transaction("productos","readonly");
+    const store=tx.objectStore("productos");
+    let encontrado=false;
+    store.openCursor().onsuccess = function(ev){
+      const cursor = ev.target.result;
+      if(cursor){
+        const p = cursor.value;
+        if(p.codigo.toLowerCase()===filtro || p.nombre.toLowerCase()===filtro){
+          agregarAVenta(p); encontrado=true; return;
+        }
+        cursor.continue();
+      } else { if(!encontrado) mostrarMsg("danger","Producto no encontrado"); }
+    };
+    this.value="";
+  }
+});
+
+function agregarAVenta(p){
+  // Verificar stock disponible
+  const cantidadActual = ventaActual[p.codigo] ? ventaActual[p.codigo].cantidad : 0;
+  if(cantidadActual + 1 > p.stock){
+    mostrarMsg("warning", `No hay suficiente stock de "${p.nombre}". Stock disponible: ${p.stock}`);
+    return;
+  }
+
+  if(ventaActual[p.codigo]) ventaActual[p.codigo].cantidad += 1;
+  else ventaActual[p.codigo] = {producto: p, cantidad: 1};
+  mostrarVenta();
+}
+
+
+function mostrarVenta(){
+  const tbody=document.querySelector("#tablaVenta tbody"); tbody.innerHTML="";
+  let total=0;
+  for(const k in ventaActual){
+    const item=ventaActual[k];
+    const sub=item.producto.precio*item.cantidad;
+    total+=sub;
+    tbody.innerHTML+=`<tr>
+<td>${item.producto.codigo}</td>
+<td>${item.producto.nombre}</td>
+<td>${item.cantidad}</td>
+<td>$${item.producto.precio.toFixed(2)}</td>
+<td>$${sub.toFixed(2)}</td>
+<td><button class="btn btn-sm btn-danger" onclick="eliminarItem('${item.producto.codigo}')"><i class="bi bi-x-circle"></i></button></td>
+</tr>`;
+  }
+  document.getElementById("totalVenta").textContent=total.toFixed(2);
+}
+
+function eliminarItem(c){ delete ventaActual[c]; mostrarVenta(); }
+function mostrarMsg(tipo,txt){ const msg=document.getElementById("msg"); msg.innerHTML=`<div class="alert alert-${tipo}">${txt}</div>`; setTimeout(()=>msg.innerHTML="",3000); }
+
+// Finalizar venta
+document.getElementById("btnFinalizar").addEventListener("click",function(){
+  if(Object.keys(ventaActual).length===0){ mostrarMsg("danger","No hay productos"); return; }
+  let total=parseFloat(document.getElementById("totalVenta").textContent);
+  let pagoStr=prompt(`Total: $${total.toFixed(2)}\nMonto recibido:`); if(pagoStr===null) return;
+  let pago=parseFloat(pagoStr); if(isNaN(pago)||pago<total){ alert("Monto inválido o insuficiente"); return; }
+  let cambio=pago-total; alert(`Pago: $${pago.toFixed(2)}\nCambio: $${cambio.toFixed(2)}`);
+
+  // Actualizar stock
+  const prodTx=db.transaction("productos","readwrite");
+  const store=prodTx.objectStore("productos");
+  for(const k in ventaActual){
+    let p=ventaActual[k].producto;
+    let cantidad=ventaActual[k].cantidad;
+    let req=store.get(p.codigo);
+    req.onsuccess = function(ev){
+      let data=ev.target.result;
+      data.stock -= cantidad;
+      if(data.stock<0) data.stock=0;
+      store.put(data);
+    };
+  }
+
+  // Guardar venta
+  const ventaTx=db.transaction("ventas","readwrite");
+  ventaTx.objectStore("ventas").add({
+    fecha:new Date().toISOString().split("T")[0],
+    productos:Object.values(ventaActual),
+    total:total,
+    pago:pago,
+    cambio:cambio
+  });
+
+  ventaActual={};
+  mostrarVenta();
+  document.getElementById("buscarProducto").value=""; document.getElementById("buscarProducto").focus();
+  mostrarMsg("success","Venta registrada ✅");
+});
+</script>
+</body>
+</html>
