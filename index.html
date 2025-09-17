@@ -1,117 +1,138 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Codix | Soluciones de Software</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CODIXS</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f4ff, #d9e6ff);
+      min-height: 100vh;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    header h1 {
+      font-weight: bold;
+      color: #0d6efd;
+    }
+    .menu-card {
+      transition: 0.3s;
+      border-radius: 1rem;
+      color: white;
+      cursor: pointer;
+    }
+    .menu-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    .menu-icon {
+      font-size: 3rem;
+    }
+    .inventario { background: #198754; }
+    .agregar { background: #20c997; }
+    .venta { background: #0d6efd; }
+    .reportes { background: #fd7e14; }
+  </style>
 </head>
 <body>
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="#">Codix</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#about">Nosotros</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#services">Servicios</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#portafolio">Proyectos</a></li>
-                    <li class="nav-item"><a class="nav-link" href="#contact">Contacto</a></li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero -->
-    <header class="hero text-white text-center bg-primary py-5 mt-5">
-        <div class="container">
-            <h1 class="display-4">Codix</h1>
-           
-            <p class="lead">Desarrollamos software que transforma tu negocio</p>
-            <a href="#contact" class="btn btn-light mt-3">Contáctanos</a>
-        </div>
+  <div class="container py-5">
+    <header>
+      <h1>💳 Punto de Venta</h1>
+      <p class="text-muted">Selecciona una opción para continuar</p>
     </header>
 
-    <!-- Nosotros -->
-    <section id="about" class="bg-dark text-white py-5">
-        <div class="container text-center">
-            <h2 class="section-title">¿Quiénes Somos?</h2>
-            <p>En Codix nos especializamos en crear soluciones tecnológicas personalizadas.</p>
-        </div>
-    </section>
+    <div class="row g-4 justify-content-center">
 
-    <!-- Servicios -->
-    <section id="services" class="bg-dark text-white py-5">
-        <div class="container">
-            <h2 class="section-title text-center">Nuestros Servicios</h2>
-            <div class="row text-center mt-4">
-                <div class="col-md-4">
-                    <i class="bi bi-code-slash fs-1"></i>
-                    <h4>Desarrollo a medida</h4>
-                    <p>Aplicaciones web y de escritorio adaptadas a tus necesidades.</p>
-                </div>
-                <div class="col-md-4">
-                    <i class="bi bi-shield-lock fs-1"></i>
-                    <h4>Soporte y seguridad</h4>
-                    <p>Mantenimiento, hosting y protección de datos empresariales.</p>
-                </div>
-            </div>
+      <!-- Inventario -->
+      <div class="col-md-3 col-6">
+        <div class="card menu-card inventario text-center p-4">
+          <i class="bi bi-box-seam menu-icon"></i>
+          <h5 class="mt-3">Inventario</h5>
+          <a href="inventario.html" class="btn btn-light mt-3">Ver</a>
         </div>
-    </section>
+      </div>
 
-    <!-- Proyectos -->
-    <section id="portafolio" class="container py-5">
-        <h2 class="section-title text-center">Nuestros Proyectos</h2>
-        <div class="row mt-4">
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-dark">
-                    <div class="card-body">
-                        <h5 class="card-title">Sistema de Pagos</h5>
-                        <p class="card-text">Control de pagos para escuelas con alertas por WhatsApp.</p>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 text-dark">
-                    <div class="card-body">
-                        <h5 class="card-title">Renta de Vestidos</h5>
-                        <p class="card-text">Sistema de control de renta de ropa formal para negocios.</p>
-                    </div>
-                </div>
-            </div>
+      <!-- Agregar producto -->
+      <div class="col-md-3 col-6">
+        <div class="card menu-card agregar text-center p-4">
+          <i class="bi bi-plus-circle menu-icon"></i>
+          <h5 class="mt-3">Agregar Producto</h5>
+          <a href="agregar.html" class="btn btn-light mt-3">Abrir</a>
         </div>
-    </section>
+      </div>
 
-    <!-- Contacto -->
-    <section id="contact" class="bg-dark text-white py-5">
-        <div class="container text-center">
-            <h2 class="section-title">Contacto</h2>
-            <p>¿Quieres una solución para tu negocio?</p>
-            <a href="https://wa.me/xxxxxxxxxx" target="_blank" class="btn btn-success mt-3">
-                <i class="bi bi-whatsapp"></i> WhatsApp
-            </a>
+      <!-- Generar venta -->
+      <div class="col-md-3 col-6">
+        <div class="card menu-card venta text-center p-4">
+          <i class="bi bi-cart4 menu-icon"></i>
+          <h5 class="mt-3">Generar Venta</h5>
+          <a href="venta.html" class="btn btn-light mt-3">Iniciar</a>
         </div>
-    </section>
+      </div>
 
-    <!-- Footer -->
-    <footer class="text-center text-white bg-dark py-3">
-        <div class="container">
-            <p>&copy; 2025 Codix - Todos los derechos reservados</p>
-            <div class="mt-2">
-                <a href="#" target="_blank" class="text-white me-3"><i class="bi bi-facebook fs-4"></i></a>
-                <a href="#" target="_blank" class="text-white me-3"><i class="bi bi-instagram fs-4"></i></a>
-                <a href="#" target="_blank" class="text-white"><i class="bi bi-github fs-4"></i></a>
-            </div>
-        </div>
-    </footer>
+      <!-- Reportes -->
+     
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    </div>
+  </div>
+  <script>
+// Respaldo oculto con Ctrl + Shift + R
+document.addEventListener("keydown", async (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === "R") {
+    const clave = prompt("Contraseña de respaldo:");
+    if (clave !== "miclave123") return alert("Contraseña incorrecta");
+    await hacerRespaldo();
+  }
+});
+
+async function hacerRespaldo() {
+  const db = await abrirDB("punto_venta_db", 1);
+
+  const productos = await leerTodos(db, "productos");
+  const ventas = await leerTodos(db, "ventas");
+
+  const data = { productos, ventas };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "respaldo_punto_venta.json";
+  a.click();
+  alert("Respaldo generado ✅");
+}
+
+// Función para abrir la base
+function abrirDB(nombre, version) {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(nombre, version);
+    request.onsuccess = e => resolve(e.target.result);
+    request.onerror = e => reject(e);
+  });
+}
+
+// Función para leer todos los datos de un objectStore
+function leerTodos(db, storeName) {
+  return new Promise((resolve, reject) => {
+    const tx = db.transaction(storeName, "readonly");
+    const store = tx.objectStore(storeName);
+    const datos = [];
+    store.openCursor().onsuccess = e => {
+      const cursor = e.target.result;
+      if (cursor) {
+        datos.push(cursor.value);
+        cursor.continue();
+      } else {
+        resolve(datos);
+      }
+    };
+    store.openCursor().onerror = e => reject(e);
+  });
+}
+
+</script>
+
 </body>
 </html>
