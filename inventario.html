@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventario</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+<style>
+body { background:#eef2f7; font-family:"Segoe UI", sans-serif; }
+header { background:#20c997; color:white; padding:1rem 2rem; border-radius:.75rem; box-shadow:0 4px 12px rgba(0,0,0,0.15); margin-bottom:2rem; }
+.card { border-radius:1rem; box-shadow:0 4px 12px rgba(0,0,0,0.1);}
+</style>
+</head>
+<body>
+<div class="container py-4">
+<header class="d-flex justify-content-between align-items-center">
+<h2><i class="bi bi-box-seam"></i> Inventario</h2>
+<a href="index.html" class="btn btn-light btn-sm"><i class="bi bi-arrow-left"></i> Regresar</a>
+</header>
+
+<div class="card p-4">
+<div class="mb-3">
+<input type="text" id="buscar" class="form-control" placeholder="Buscar por código o nombre">
+</div>
+<div class="table-responsive">
+<table class="table table-hover" id="tablaInventario">
+<thead class="table-dark">
+<tr>
+<th>Código</th><th>Nombre</th><th>Categoria</th><th>Precio</th><th>Stock</th><th>Acciones</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<!-- Modal de edición -->
+<div class="modal fade" id="modalEditar" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-success text-white">
+        <h5 class="modal-title"><i class="bi bi-pencil-square"></i> Editar Producto</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="formEditar">
+          <input type="hidden" id="editarCodigo">
+          <div class="mb-3">
+            <label>Nombre</label>
+            <input type="text" id="editarNombre" class="form-control" required>
+          </div>
+          <div class="mb-3">
+            <label>Categoria</label>
+            <select id="editarCategoria" class="form-select" required>
+              <option>Bebidas</option>
+              <option>Comida</option>
+              <option>Snacks</option>
+              <option>Otros</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label>Precio</label>
+            <input type="number" id="editarPrecio" class="form-control" min="0" step="0.01" required>
+          </div>
+          <div class="mb-3">
+            <label>Stock</label>
+            <input type="number" id="editarStock" class="form-control" min="0" required>
+          </div>
+          <button type="submit" class="btn btn-success w-100">Guardar Cambios</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let db;
+const request = indexedDB.open("punto_venta_db",1);
+
+request.onupgradeneeded = function(e){
+  db = e.target.result;
+  if(!db.objectStoreNames.contains("productos")){
+    const store = db.createObjectStore("productos", { keyPath:"codigo" });
+    store.createIndex("nombre","nombre",{unique:false});
+  }
+};
+
+request.onsuccess = function(e){
+  db = e.target.result;
+  mostrarInventario();
+};
+
+request.onerror = function(e){ console.error("Error DB:",e); };
+
+function mostrarInventario(filtro=""){
+  const tbody = document.querySelector("#tablaInventario tbody");
+  tbody.innerHTML="";
+  const tx = db.transaction("productos","readonly");
+  const store = tx.objectStore("productos");
+
+  store.openCursor().onsuccess = function(e){
+    const cursor = e.target.result;
+    if(cursor){
+      const p = cursor.value;
+      if(!filtro || p.codigo.toLowerCase().includes(filtro) || p.nombre.toLowerCase().includes(filtro)){
+        tbody.innerHTML += `<tr>
+          <td>${p.codigo}</td>
+          <td>${p.nombre}</td>
+          <td>${p.categoria}</td>
+          <td>$${p.precio.toFixed(2)}</td>
+          <td>${p.stock}</td>
+          <td><button class="btn btn-sm btn-primary" onclick="editarProducto('${p.codigo}')"><i class="bi bi-pencil-square"></i></button></td>
+        </tr>`;
+      }
+      cursor.continue();
+    }
+  };
+}
+
+document.getElementById("buscar").addEventListener("input", function(){
+  mostrarInventario(this.value.trim().toLowerCase());
+});
+
+// Función para abrir modal con datos del producto
+function editarProducto(codigo){
+  const tx = db.transaction("productos","readonly");
+  const store = tx.objectStore("productos");
+  const req = store.get(codigo);
+  req.onsuccess = function(){
+    const p = req.result;
+    if(p){
+      document.getElementById("editarCodigo").value = p.codigo;
+      document.getElementById("editarNombre").value = p.nombre;
+      document.getElementById("editarCategoria").value = p.categoria;
+      document.getElementById("editarPrecio").value = p.precio;
+      document.getElementById("editarStock").value = p.stock;
+      const modal = new bootstrap.Modal(document.getElementById("modalEditar"));
+      modal.show();
+    }
+  };
+}
+
+// Guardar cambios
+document.getElementById("formEditar").addEventListener("submit", function(e){
+  e.preventDefault();
+  const codigo = document.getElementById("editarCodigo").value;
+  const nombre = document.getElementById("editarNombre").value;
+  const categoria = document.getElementById("editarCategoria").value;
+  const precio = parseFloat(document.getElementById("editarPrecio").value);
+  const stock = parseInt(document.getElementById("editarStock").value);
+
+  const tx = db.transaction("productos","readwrite");
+  const store = tx.objectStore("productos");
+  store.put({codigo,nombre,categoria,precio,stock});
+  tx.oncomplete = function(){
+    mostrarInventario();
+    bootstrap.Modal.getInstance(document.getElementById("modalEditar")).hide();
+  };
+});
+</script>
+</body>
+</html>
